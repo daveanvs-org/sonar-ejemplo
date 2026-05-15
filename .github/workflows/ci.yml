@@ -6,6 +6,9 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   test-and-sonar:
     name: Test & Scan
@@ -20,9 +23,10 @@ jobs:
 
       # 2. Instalar uv
       - name: Setup uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.11"
+          cache-dependency-glob: "pyproject.toml"
 
       # 3. Instalar dependencias (prod + dev) con uv
       - name: Instalar dependencias
@@ -47,7 +51,7 @@ jobs:
       # 6. Análisis con SonarCloud
       #    Requiere el secret SONAR_TOKEN configurado en el repositorio de GitHub
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v4
+        uses: SonarSource/sonarqube-scan-action@v6
         with:
           args: >
             -Dsonar.organization=daveanvs

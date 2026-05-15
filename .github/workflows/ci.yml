@@ -50,8 +50,8 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v4
         with:
           args: >
-            -Dsonar.organization=TU_ORG_SONARCLOUD
-            -Dsonar.projectKey=TU_ORG_SONARCLOUD_demo-fastapi
+            -Dsonar.organization=daveanvs
+            -Dsonar.projectKey=sonar-ejemplo
             "-Dsonar.projectName=Demo FastAPI"
             -Dsonar.sources=app
             -Dsonar.tests=tests

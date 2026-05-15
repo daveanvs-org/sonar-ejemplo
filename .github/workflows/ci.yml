@@ -47,7 +47,7 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v6
         with:
           args: >
-            -Dsonar.organization=daveanvs
+            -Dsonar.organization=daveanvs-org
             -Dsonar.projectKey=sonar-ejemplo
             "-Dsonar.projectName=sonar-ejemplo"
             -Dsonar.sources=app

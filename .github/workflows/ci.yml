@@ -49,7 +49,6 @@ jobs:
           args: >
             -Dsonar.organization=daveanvs-org
             -Dsonar.projectKey=sonar-ejemplo
-            "-Dsonar.projectName=sonar-ejemplo"
             -Dsonar.sources=app
             -Dsonar.tests=tests
             -Dsonar.python.version=3.11

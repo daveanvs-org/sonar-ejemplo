@@ -41,14 +41,7 @@ jobs:
             --cov-report=term-missing \
             -v
 
-      # 5. Subir artefacto de cobertura (opcional, útil para auditoría)
-      - name: Subir reporte de cobertura
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage.xml
-
-      # 6. Análisis con SonarCloud
+      # 5. Análisis con SonarCloud
       #    Requiere el secret SONAR_TOKEN configurado en el repositorio de GitHub
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
@@ -56,7 +49,7 @@ jobs:
           args: >
             -Dsonar.organization=daveanvs
             -Dsonar.projectKey=sonar-ejemplo
-            "-Dsonar.projectName=Demo FastAPI"
+            "-Dsonar.projectName=sonar-ejemplo"
             -Dsonar.sources=app
             -Dsonar.tests=tests
             -Dsonar.python.version=3.11

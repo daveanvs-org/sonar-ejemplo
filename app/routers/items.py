@@ -23,7 +23,7 @@ def list_items():
     return [ItemResponse(id=k, **v) for k, v in _db.items()]
 
 
-@router.get("/{item_id}", response_model=ItemResponse)
+@router.get("/{item_id}", response_model=ItemResponse, responses={404: {"description": "Item no encontrado"}})
 def get_item(item_id: int):
     if item_id not in _db:
         raise HTTPException(status_code=404, detail="Item no encontrado")
@@ -39,7 +39,7 @@ def create_item(item: ItemCreate):
     return created
 
 
-@router.delete("/{item_id}", status_code=204)
+@router.delete("/{item_id}", status_code=204, responses={404: {"description": "Item no encontrado"}})
 def delete_item(item_id: int):
     if item_id not in _db:
         raise HTTPException(status_code=404, detail="Item no encontrado")

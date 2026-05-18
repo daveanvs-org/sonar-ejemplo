@@ -1,0 +1,58 @@
+name: CI – Tests & SonarCloud
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  test-and-sonar:
+    name: Test & Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout con historial completo (necesario para el blame de Sonar)
+      - name: Checkout código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2. Instalar uv
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+          cache-dependency-glob: "pyproject.toml"
+
+      # 3. Instalar dependencias (prod + dev) con uv
+      - name: Instalar dependencias
+        run: uv sync --group dev
+
+      # 4. Ejecutar tests y generar reporte de cobertura en XML
+      - name: Ejecutar tests con cobertura
+        run: |
+          uv run pytest tests/ \
+            --cov=app \
+            --cov-report=xml:coverage.xml \
+            --cov-report=term-missing \
+            -v
+
+      # 5. Análisis con SonarCloud
+      #    Requiere el secret SONAR_TOKEN configurado en el repositorio de GitHub
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        with:
+          args: >
+            -Dsonar.organization=daveanvs-org
+            -Dsonar.projectKey=sonar-ejemplo
+            -Dsonar.sources=app
+            -Dsonar.tests=tests
+            -Dsonar.python.version=3.11
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.exclusions=**/__pycache__/**,**/*.pyc
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

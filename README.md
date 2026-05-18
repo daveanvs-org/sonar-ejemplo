@@ -14,14 +14,15 @@ Los ejemplos están en [`app/utils.py`](app/utils.py) y [`app/routers/items.py`]
 
 ---
 
-### 🔴 Security — SQL Injection (S3649) — `app/routers/items.py`
+### 🔴 Security — Contraseña hardcodeada (S6437) — `app/utils.py`
 
-El query parameter `name` viene directamente del usuario HTTP y se concatena sin sanitizar en una query SQL. Sonar lo detecta mediante *taint analysis* (rastrea el flujo del dato desde el input HTTP hasta la query). Aparece como **Vulnerability** en Security.
+Las credenciales de base de datos están escritas directamente en el código. Quedan expuestas en el historial de Git y cualquier persona con acceso al repositorio puede extraerlas y conectarse a la base de datos. Aparece en SonarCloud como **Security Hotspot**.
 
 ```python
-@router.get("/search")
-def search_items(name: str):
-    query = "SELECT * FROM items WHERE name = '" + name + "'"  # ← SQL injection
+DB_PASSWORD = "P@ssw0rd_Prod_2024!"  # ← hardcoded password
+
+def get_db_connection():
+    return f"mysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/items_db"
 ```
 
 ### 🔴 Security — Hash débil MD5 (S4790) — `app/utils.py`

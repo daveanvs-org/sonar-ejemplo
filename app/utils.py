@@ -1,8 +1,23 @@
 import hashlib
 
 # =============================================================================
-# SECURITY — python:S4790: Algoritmo de hash débil (MD5)
-# Regla: https://rules.sonarsource.com/python/RSPEC-4790
+# SECURITY #1 — python:S6437: Contraseña hardcodeada (Security Hotspot)
+# Las credenciales de base de datos escritas directamente en el código quedan
+# expuestas en el historial de Git. Cualquier persona con acceso al repositorio
+# puede extraerlas y conectarse a la base de datos directamente.
+# Aparece en SonarCloud como Security Hotspot.
+# =============================================================================
+DB_HOST = "prod-db.empresa.com"
+DB_USER = "admin"
+DB_PASSWORD = "P@ssw0rd_Prod_2024!"  # noqa: S105  ← hardcoded password
+
+
+def get_db_connection():
+    return f"mysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/items_db"
+
+
+# =============================================================================
+# SECURITY #2 — python:S4790: Algoritmo de hash débil (MD5)
 # MD5 está criptográficamente roto; no debe usarse para datos sensibles.
 # Aparece en SonarCloud como Security Hotspot (requiere revisión humana).
 # =============================================================================

@@ -49,6 +49,23 @@ def get_item_status(price: float) -> str:
     print(f"Price checked: {price}")  # ← unreachable code after return
 ```
 
+**Corrección:** guardar el resultado en una variable, ejecutar el `print` y luego hacer `return` al final:
+
+```python
+def get_item_status(price: float) -> str:
+    # 1. Evaluamos la condición y guardamos el resultado en una variable
+    if price > 100:
+        status = "expensive"
+    else:
+        status = "cheap"
+
+    # 2. Ahora el print SÍ es alcanzable y se ejecutará siempre
+    print(f"Price checked: {price}")
+
+    # 3. La función termina aquí devolviendo el estado correcto
+    return status
+```
+
 ---
 
 ### 🟡 Maintainability — Complejidad cognitiva excesiva (S3776) — `app/utils.py`

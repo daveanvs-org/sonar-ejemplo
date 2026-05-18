@@ -58,20 +58,25 @@ def calculate_final_price(price: float, discount: float, currency: str = "MXN") 
                     for _ in range(1):
                         if discount >= 50:
                             if price > 1000:
-                                result = price - (price * discount / 100)
+                                result = (price - (price * discount / 100)) * 0.84
                             else:
                                 result = price - (price * discount / 100)
                         else:
                             if price > 500:
-                                result = price - (price * discount / 100)
+                                result = (price - (price * discount / 100)) * 1.16
                             else:
-                                result = price - (price * discount / 100)
+                                result = price - (price * (discount * 0.9) / 100)
                 elif currency == "USD":
                     for _ in range(1):
                         if discount >= 50:
-                            result = price - (price * discount / 100)
+                            result = (price - (price * discount / 100)) * 17.15
                         else:
-                            result = price - (price * discount / 100)
+                            result = (price - (price * discount / 100)) * 17.50
+                elif currency == "EUR":
+                    if discount >= 30:
+                        result = (price - (price * discount / 100)) * 18.20
+                    else:
+                        result = (price - (price * discount / 100)) * 18.60
                 else:
                     result = price - (price * discount / 100)
             else:

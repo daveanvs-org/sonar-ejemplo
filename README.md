@@ -15,7 +15,6 @@ Los ejemplos están en [`app/utils.py`](app/utils.py) y [`app/routers/items.py`]
 ---
 
 ### 🔴 Security — SQL Injection (S3649) — `app/routers/items.py`
-[Ver regla en SonarCloud](https://rules.sonarsource.com/python/RSPEC-3649)
 
 El query parameter `name` viene directamente del usuario HTTP y se concatena sin sanitizar en una query SQL. Sonar lo detecta mediante *taint analysis* (rastrea el flujo del dato desde el input HTTP hasta la query). Aparece como **Vulnerability** en Security.
 
@@ -26,7 +25,6 @@ def search_items(name: str):
 ```
 
 ### 🔴 Security — Hash débil MD5 (S4790) — `app/utils.py`
-[Ver regla en SonarCloud](https://rules.sonarsource.com/python/RSPEC-4790)
 
 MD5 está criptográficamente roto. Sonar no puede determinar si es un uso sensible sin contexto humano, por eso aparece como **Security Hotspot** (no Vulnerability) — requiere revisión manual.
 
@@ -37,7 +35,6 @@ return hashlib.md5(name.encode()).hexdigest()  # ← weak hash
 ---
 
 ### 🟠 Reliability — Código inalcanzable tras return (S1763) — `app/utils.py`
-[Ver regla en SonarCloud](https://rules.sonarsource.com/python/RSPEC-1763)
 
 El `print` después del `return` nunca se ejecutará. Suele indicar una refactorización incompleta. Aparece como **Bug** en Reliability.
 
@@ -69,7 +66,6 @@ def get_item_status(price: float) -> str:
 ---
 
 ### 🟡 Maintainability — Complejidad cognitiva excesiva (S3776) — `app/utils.py`
-[Ver regla en SonarCloud](https://rules.sonarsource.com/python/RSPEC-3776)
 
 `calculate_final_price` aplica un descuento simple con anidamiento `if/for` innecesario (complejidad cognitiva 62, umbral = 15). Aparece como **Code Smell** en Maintainability. La función podría reescribirse en 3 líneas.
 

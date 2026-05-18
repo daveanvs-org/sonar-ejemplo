@@ -10,35 +10,37 @@ Proyecto de ejemplo con **FastAPI** para demostrar el análisis de calidad de c�
 
 Los siguientes problemas están en [`app/utils.py`](app/utils.py) de forma **intencional** como material didáctico.
 
-### 🔴 Security — Credencial hardcodeada (S6437)
-[Ver regla en SonarCloud](https://rules.sonarsource.com/python/RSPEC-6437)
+### 🔴 Security — SQL Injection (S3649)
+[Ver regla en SonarCloud](https://rules.sonarsource.com/python/RSPEC-3649)
 
-Un `API_SECRET_TOKEN` escrito directamente en el código queda expuesto en el historial de Git. Cualquier persona con acceso al repositorio puede extraerlo.
+La query se construye concatenando directamente el input del usuario. Un atacante puede inyectar SQL malicioso y leer, modificar o borrar cualquier dato de la base de datos. Aparece en SonarCloud como **Vulnerability**.
 
 ```python
-API_SECRET_TOKEN = "sk-prod-4aB9xQ2rTz8mKvLp1NcW"  # ← hardcoded credential
+query = "SELECT * FROM items WHERE name = '" + name + "'"  # ← SQL injection
 ```
 
 ### 🔴 Security — Algoritmo de hash débil MD5 (S4790)
 [Ver regla en SonarCloud](https://rules.sonarsource.com/python/RSPEC-4790)
 
-`hashlib.md5()` está criptográficamente roto y no debe usarse para datos sensibles ni verificación de integridad.
+`hashlib.md5()` está criptográficamente roto y no debe usarse para datos sensibles ni verificación de integridad. Aparece en SonarCloud como **Security Hotspot**.
 
 ```python
 return hashlib.md5(name.encode()).hexdigest()  # ← weak hash
 ```
 
-### 🟠 Reliability — Recurso abierto que nunca se cierra (S2674)
-[Ver regla en SonarCloud](https://rules.sonarsource.com/python/RSPEC-2674)
+### 🟠 Reliability — Argumento mutable por defecto (S5717)
+[Ver regla en SonarCloud](https://rules.sonarsource.com/python/RSPEC-5717)
 
-`open()` sin `with` ni `close()` deja el descriptor de archivo abierto si ocurre una excepción, agotando los recursos del sistema operativo.
+La lista `tags=[]` se comparte entre **todas** las llamadas a la función. Si una llamada la modifica, la siguiente recibe la lista ya modificada, produciendo comportamiento inesperado difícil de depurar. Aparece en SonarCloud como **Bug**.
 
 ```python
-f = open(filepath)   # ← nunca se llama f.close()
-reader = csv.reader(f)
+def build_item_tags(item_name: str, tags: list = []) -> list:  # ← mutable default
+    tags.append(item_name)
+    return tags
 ```
 
 ### 🟡 Maintainability — Complejidad cognitiva excesiva (S3776)
 [Ver regla en SonarCloud](https://rules.sonarsource.com/python/RSPEC-3776)
 
-La función `calculate_final_price` aplica un descuento simple pero con un anidamiento de `if/for` innecesario que dispara la complejidad cognitiva muy por encima del umbral de 15. Debería reescribirse en 3 líneas.
+La función `calculate_final_price` aplica un descuento simple pero con un anidamiento de `if/for` innecesario que dispara la complejidad cognitiva muy por encima del umbral de 15. Aparece en SonarCloud como **Code Smell**.
+

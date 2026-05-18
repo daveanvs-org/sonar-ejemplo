@@ -1,48 +1,40 @@
-import csv
 import hashlib
 
 # =============================================================================
-# SECURITY #1 — python:S6437: Credencial hardcodeada
-# Regla: https://rules.sonarsource.com/python/RSPEC-6437
-# Un token/contraseña escrito directamente en el código queda expuesto
-# en el historial de Git y puede ser extraído por cualquiera con acceso
-# al repositorio.
+# SECURITY — python:S3649: SQL Injection (Vulnerability)
+# Regla: https://rules.sonarsource.com/python/RSPEC-3649
+# La query se construye concatenando directamente el input del usuario.
+# Un atacante puede inyectar SQL malicioso y leer, modificar o borrar
+# cualquier dato de la base de datos.
+#   Ejemplo de ataque: name = "' OR '1'='1"
 # =============================================================================
-API_SECRET_TOKEN = "sk-prod-4aB9xQ2rTz8mKvLp1NcW"   # noqa: S105  ← hardcoded credential
-
-
-def get_auth_header() -> dict:
-    return {"Authorization": f"Bearer {API_SECRET_TOKEN}"}
+def search_items_by_name(db_conn, name: str):
+    query = "SELECT * FROM items WHERE name = '" + name + "'"  # ← SQL injection
+    return db_conn.execute(query)
 
 
 # =============================================================================
 # SECURITY #2 — python:S4790: Algoritmo de hash débil (MD5)
 # Regla: https://rules.sonarsource.com/python/RSPEC-4790
-# MD5 está criptográficamente roto; no debe usarse para datos sensibles
-# ni como función de verificación de integridad en contextos de seguridad.
+# MD5 está criptográficamente roto; no debe usarse para datos sensibles.
+# (Este aparece en Security Hotspots en SonarCloud)
 # =============================================================================
 def hash_item_name(name: str) -> str:
     return hashlib.md5(name.encode()).hexdigest()  # noqa: S324  ← weak hash
 
 
 # =============================================================================
-# RELIABILITY — python:S2674: Recurso abierto que nunca se cierra (Resource Leak)
-# Regla: https://rules.sonarsource.com/python/RSPEC-2674
-# El archivo CSV se abre con open() pero si ocurre una excepción antes de
-# llegar al final de la función el archivo queda abierto indefinidamente,
-# consumiendo descriptores de archivo del sistema operativo.
+# RELIABILITY — python:S5717: Argumento mutable por defecto (Bug)
+# Regla: https://rules.sonarsource.com/python/RSPEC-5717
+# La lista `tags=[]` se comparte entre TODAS las llamadas a la función.
+# Si una llamada la modifica, la siguiente llamada recibe la lista ya modificada,
+# produciendo comportamiento inesperado difícil de depurar.
 # =============================================================================
-def read_item_prices(filepath: str) -> list[float]:
-    f = open(filepath)          # ← archivo nunca cerrado con close() ni with
-    reader = csv.reader(f)
-    prices = []
-    for row in reader:
-        if row:
-            prices.append(float(row[0]))
-    return prices
+def build_item_tags(item_name: str, tags: list = []) -> list:  # noqa: B006  ← mutable default
+    tags.append(item_name)
+    return tags
 
 
-# =============================================================================
 # MAINTAINABILITY — python:S3776: Complejidad cognitiva demasiado alta
 # Regla: https://rules.sonarsource.com/python/RSPEC-3776
 # Esta función aplica un descuento simple pero lo implementa con anidamiento

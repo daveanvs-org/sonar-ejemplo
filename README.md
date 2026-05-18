@@ -8,39 +8,52 @@ Proyecto de ejemplo con **FastAPI** para demostrar el análisis de calidad de c�
 
 ## Ejemplos de issues detectados por SonarCloud
 
-Los siguientes problemas están en [`app/utils.py`](app/utils.py) de forma **intencional** como material didáctico.
+Los ejemplos están en [`app/utils.py`](app/utils.py) y [`app/routers/items.py`](app/routers/items.py) de forma **intencional** como material didáctico.
 
-### 🔴 Security — SQL Injection (S3649)
+> **Nota sobre el Quality Gate:** Tener issues no significa automáticamente reprobar la métrica. SonarCloud evalúa un *rating* (A–E). Para que una métrica repruebe, el rating debe ser peor que A en código nuevo: basta **1 Bug** para que Reliability sea E, **1 Vulnerability** para que Security sea E. Maintainability evalúa el ratio de deuda técnica (deuda en minutos / costo estimado de desarrollo), por lo que en proyectos pequeños se mantiene en A aunque haya Code Smells.
+
+---
+
+### 🔴 Security — SQL Injection (S3649) — `app/routers/items.py`
 [Ver regla en SonarCloud](https://rules.sonarsource.com/python/RSPEC-3649)
 
-La query se construye concatenando directamente el input del usuario. Un atacante puede inyectar SQL malicioso y leer, modificar o borrar cualquier dato de la base de datos. Aparece en SonarCloud como **Vulnerability**.
+El query parameter `name` viene directamente del usuario HTTP y se concatena sin sanitizar en una query SQL. Sonar lo detecta mediante *taint analysis* (rastrea el flujo del dato desde el input HTTP hasta la query). Aparece como **Vulnerability** en Security.
 
 ```python
-query = "SELECT * FROM items WHERE name = '" + name + "'"  # ← SQL injection
+@router.get("/search")
+def search_items(name: str):
+    query = "SELECT * FROM items WHERE name = '" + name + "'"  # ← SQL injection
 ```
 
-### 🔴 Security — Algoritmo de hash débil MD5 (S4790)
+### 🔴 Security — Hash débil MD5 (S4790) — `app/utils.py`
 [Ver regla en SonarCloud](https://rules.sonarsource.com/python/RSPEC-4790)
 
-`hashlib.md5()` está criptográficamente roto y no debe usarse para datos sensibles ni verificación de integridad. Aparece en SonarCloud como **Security Hotspot**.
+MD5 está criptográficamente roto. Sonar no puede determinar si es un uso sensible sin contexto humano, por eso aparece como **Security Hotspot** (no Vulnerability) — requiere revisión manual.
 
 ```python
 return hashlib.md5(name.encode()).hexdigest()  # ← weak hash
 ```
 
-### 🟠 Reliability — Argumento mutable por defecto (S5717)
-[Ver regla en SonarCloud](https://rules.sonarsource.com/python/RSPEC-5717)
+---
 
-La lista `tags=[]` se comparte entre **todas** las llamadas a la función. Si una llamada la modifica, la siguiente recibe la lista ya modificada, produciendo comportamiento inesperado difícil de depurar. Aparece en SonarCloud como **Bug**.
+### 🟠 Reliability — Código inalcanzable tras return (S1763) — `app/utils.py`
+[Ver regla en SonarCloud](https://rules.sonarsource.com/python/RSPEC-1763)
+
+El `print` después del `return` nunca se ejecutará. Suele indicar una refactorización incompleta. Aparece como **Bug** en Reliability.
 
 ```python
-def build_item_tags(item_name: str, tags: list = []) -> list:  # ← mutable default
-    tags.append(item_name)
-    return tags
+def get_item_status(price: float) -> str:
+    if price > 100:
+        return "expensive"
+    return "cheap"
+    print(f"Price checked: {price}")  # ← unreachable code after return
 ```
 
-### 🟡 Maintainability — Complejidad cognitiva excesiva (S3776)
+---
+
+### 🟡 Maintainability — Complejidad cognitiva excesiva (S3776) — `app/utils.py`
 [Ver regla en SonarCloud](https://rules.sonarsource.com/python/RSPEC-3776)
 
-La función `calculate_final_price` aplica un descuento simple pero con un anidamiento de `if/for` innecesario que dispara la complejidad cognitiva muy por encima del umbral de 15. Aparece en SonarCloud como **Code Smell**.
+`calculate_final_price` aplica un descuento simple con anidamiento `if/for` innecesario (complejidad cognitiva 62, umbral = 15). Aparece como **Code Smell** en Maintainability. La función podría reescribirse en 3 líneas.
+
 

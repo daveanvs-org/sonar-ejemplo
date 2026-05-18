@@ -44,3 +44,18 @@ def delete_item(item_id: int):
     if item_id not in _db:
         raise HTTPException(status_code=404, detail="Item no encontrado")
     del _db[item_id]
+
+
+# =============================================================================
+# SECURITY — python:S3649: SQL Injection (Vulnerability)
+# Regla: https://rules.sonarsource.com/python/RSPEC-3649
+# El parámetro `name` viene directamente del query string del usuario HTTP.
+# Se concatena sin sanitizar en la query SQL, permitiendo a un atacante
+# inyectar SQL arbitrario.  Ejemplo: name = "' OR '1'='1"
+# Aparece en SonarCloud como Vulnerability en Security.
+# =============================================================================
+@router.get("/search")
+def search_items(name: str):
+    query = "SELECT * FROM items WHERE name = '" + name + "'"  # ← SQL injection
+    return {"query": query}
+

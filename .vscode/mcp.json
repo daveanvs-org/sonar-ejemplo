@@ -2,12 +2,22 @@
   "servers": {
     "sonarqube": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@sonarqube/mcp-server"],
+      "command": "docker",
+      "args": [
+        "run",
+        "--init",
+        "--pull=always",
+        "-i",
+        "--rm",
+        "-e",
+        "SONARQUBE_TOKEN",
+        "-e",
+        "SONARQUBE_ORG",
+        "mcp/sonarqube"
+      ],
       "env": {
-        "SONARQUBE_URL": "https://sonarcloud.io",
         "SONARQUBE_TOKEN": "${input:sonarToken}",
-        "SONARQUBE_ORGANIZATION": "daveanvs-org"
+        "SONARQUBE_ORG": "daveanvs-org"
       }
     }
   },

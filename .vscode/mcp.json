@@ -1,0 +1,22 @@
+{
+  "servers": {
+    "sonarqube": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@sonarqube/mcp-server"],
+      "env": {
+        "SONARQUBE_URL": "https://sonarcloud.io",
+        "SONARQUBE_TOKEN": "${input:sonarToken}",
+        "SONARQUBE_ORGANIZATION": "daveanvs-org"
+      }
+    }
+  },
+  "inputs": [
+    {
+      "id": "sonarToken",
+      "type": "promptString",
+      "description": "SonarCloud Token (SONAR_TOKEN)",
+      "password": true
+    }
+  ]
+}
